@@ -25,15 +25,14 @@ Let's do lexical binding for shit
 (setq org-directory "~/org/")
 (setq x-select-enable-clipboard-manager nil)
 
-(setq which-key-idle-delay 0.25)
-
-
 (map! :g "<escape>" #'keyboard-quit)
 
 (map! "C-n" nil)
+(map! "C-p" nil)
 
+(setq doom-localleader-key "SPC x")
 
-(global-display-line-numbers-mode 0)
+(setq display-line-numbers-type nil)
 
 #+end_src
 
@@ -103,6 +102,9 @@ Additionally, we make the top and bottom lines of the block smaller and darker.
        :desc "Switch buffer"                 "b" #'switch-to-buffer
        :desc "Switch buffer in other window" "o" #'counsel-switch-buffer-other-window
        :desc "close window buffer"           "d" #'kill-buffer-and-window
+       :desc "next group"                    "l" #'centaur-tabs-forward-group
+       :desc "previous group"                "h" #'centaur-tabs-backward-group
+       :desc "show groups"                   "j" #'centaur-tabs-toggle-groups
        :desc "h-split"                       "s" #'split-window-below
        :desc "v-split"                       "v" #'split-window-right))
 #+END_SRC
@@ -267,6 +269,24 @@ Additionally, we make the top and bottom lines of the block smaller and darker.
               "C-p" #'company-select-previous))
 
 
+
+
+
+(after! lsp-ui
+        (setq lsp-ui-doc-enable 1)
+        (setq lsp-ui-doc-show-with-cursor 1)
+        (setq lsp-ui-doc-position "at-point")
+        (setq lsp-ui-doc-max-width 200)
+        (setq lsp-ui-doc-max-height 50)
+        (setq lsp-ui-doc-use-webkit t)
+        (setq lsp-ui-doc-border 'unspecified)
+        (setq lsp-ui-peek-enable 1))
+
+
+
+
+
+
 #+END_SRC
 
 
@@ -285,53 +305,83 @@ Additionally, we make the top and bottom lines of the block smaller and darker.
 
 
 #+BEGIN_SRC emacs-lisp
-(map! :leader
-      ;;; <leader> c --- code
-      (:prefix-map ("c" . "code")
-       (:when (and (featurep! :tools lsp) (not (featurep! :tools lsp +eglot)))
-        :desc "LSP Execute code action" "a" #'lsp-execute-code-action
-        :desc "LSP Organize imports" "o" #'lsp-organize-imports
-        (:when (featurep! :completion ivy)
-         :desc "Jump to symbol in current workspace" "j"   #'lsp-ivy-workspace-symbol
-         :desc "Jump to symbol in any workspace"     "J"   #'lsp-ivy-global-workspace-symbol)
-        (:when (featurep! :completion helm)
-         :desc "Jump to symbol in current workspace" "j"   #'helm-lsp-workspace-symbol
-         :desc "Jump to symbol in any workspace"     "J"   #'helm-lsp-global-workspace-symbol)
-        :desc "LSP"                                  "l"   #'+default/lsp-command-map
-        :desc "LSP Rename"                           "r"   #'lsp-rename)
-       (:when (featurep! :tools lsp +eglot)
-        :desc "LSP Execute code action" "a" #'eglot-code-actions
-        :desc "LSP Rename" "r" #'eglot-rename
-        :desc "LSP Find declaration" "j" #'eglot-find-declaration)
-       :desc "Compile"                               "c"   #'compile
-       :desc "Recompile"                             "C"   #'recompile
-       :desc "Jump to definition"                    "d"   #'+lookup/definition
-       :desc "Jump to references"                    "D"   #'+lookup/references
-       :desc "Evaluate buffer/region"                "e"   #'+eval/buffer-or-region
-       :desc "Evaluate & replace region"             "E"   #'+eval:replace-region
-       :desc "Format buffer/region"                  "f"   #'+format/region-or-buffer
-       :desc "Find implementations"                  "i"   #'+lookup/implementations
-       :desc "Jump to documentation"                 "k"   #'+lookup/documentation
-       :desc "Send to repl"                          "s"   #'+eval/send-region-to-repl
-       :desc "Find type definition"                  "t"   #'+lookup/type-definition
-       :desc "Delete trailing whitespace"            "w"   #'delete-trailing-whitespace
-       :desc "Delete trailing newlines"              "W"   #'doom/delete-trailing-newlines
-       :desc "List errors"                           "x"   #'flymake-show-diagnostics-buffer
-       (:when (featurep! :checkers syntax)
-        :desc "List errors"                         "x"   #'flycheck-list-errors)))
+;;(map! :leader
+;;      (:prefix-map ("m" . "Code")
+;;       (:when (and (featurep! :tools lsp) (not (featurep! :tools lsp +eglot)))
+;;        :desc "LSP Execute code action" "a" #'lsp-execute-code-action
+;;        :desc "LSP Organize imports" "o" #'lsp-organize-imports
+;;        (:when (featurep! :completion ivy)
+;;         :desc "Jump to symbol in current workspace" "j"   #'lsp-ivy-workspace-symbol
+;;         :desc "Jump to symbol in any workspace"     "J"   #'lsp-ivy-global-workspace-symbol
+;;        :desc "LSP"                                  "l"   #'+default/lsp-command-map
+;;        :desc "LSP Rename"                           "r"   #'lsp-rename
+;;       :desc "Compile"                               "c"   #'compile
+;;       :desc "Recompile"                             "C"   #'recompile
+;;       :desc "Jump to definition"                    "d"   #'+lookup/definition
+;;       :desc "Jump to references"                    "D"   #'+lookup/references
+;;       :desc "Evaluate buffer/region"                "e"   #'+eval/buffer-or-region
+;;       :desc "Evaluate & replace region"             "E"   #'+eval:replace-region
+;;       :desc "Format buffer/region"                  "f"   #'+format/region-or-buffer
+;;       :desc "Find implementations"                  "i"   #'+lookup/implementations
+;;       :desc "Jump to documentation"                 "k"   #'+lookup/documentation
+;;       :desc "Send to repl"                          "s"   #'+eval/send-region-to-repl
+;;       :desc "Find type definition"                  "t"   #'+lookup/type-definition
+;;       :desc "Delete trailing whitespace"            "w"   #'delete-trailing-whitespace
+;;       :desc "Delete trailing newlines"              "W"   #'doom/delete-trailing-newlines
+;;       :desc "List errors"                           "x"   #'flymake-show-diagnostics-buffer
+;;       (:when (featurep! :checkers syntax)
+;;        :desc "List errors"                         "x"   #'flycheck-list-errors
 
+(map! :leader
+      (:prefix-map ("m" . "Code")
+       :desc "LSP"                                  "l"   #'+default/lsp-command-map
+       :desc "Rename symbol"                         "r"   #'lsp-rename
+       :desc "Go to definition"                      "g"   #'+lookup/definition
+       :desc "Go to type-definition"                 "t"   #'+lookup/type-definition
+       ;; :desc "Find references"                       "r"   #'+lookup/references
+       :desc "Find references"                       "r"   #'lsp-ui-peek-find-references
+       :desc "Go to implementation"                  "i"   #'+lookup/implementations
+       :desc "Format"                                "f"   #'+format/region-or-buffer
+       :desc "Find symbols"                          "s"   #'lsp-ivy-global-workspace-symbol
+       :desc "List errors"                           "e"   #'flycheck-list-errors
+       :desc "Show diagnostics buffer"               "w"   #'lsp-diagnostics--flycheck-buffer
+       :desc "Compile"                               "c"   #'compile
+       :desc "Compile"                               "C"   #'recompile
+       :desc "Show documentation"                    "d"   #'lsp-ui-doc-glance))
 #+END_SRC
+
+
+* Fix counsel shit
+
+#+BEGIN_SRC emacs-lisp
+
+;; (counsel-find-file-map)
+#+END_SRC
+
 
 
 
 * general theme fixup
 #+BEGIN_SRC emacs-lisp
 (custom-set-faces!
-  '(markdown-code-face :background "#282828"))
+  '(markdown-code-face :inherit :background :background nil))
+  ;;'(markdown-code-face :background "#282828"))
 
-(set-window-margins (selected-window) 1 1)
+
+;;(after! markdown
+;;  (set-face-attribute 'markdown-code-face nil :inherit :background :background nil))
+
+(add-hook 'window-configuration-change-hook
+          (lambda ()
+            (set-window-margins (car (get-buffer-window-list (current-buffer) nil t)) 2 2)))
+
+(set-window-margins (selected-window) 2 2)
 (add-hook! '+popup-buffer-mode-hook
-  (set-window-margins (selected-window) 1 1))
+  (set-window-margins (selected-window) 2 2))
+
+
+(after! centaur-tabs
+    (setq centaur-tabs-style "box"))
 #+END_SRC
 
 
