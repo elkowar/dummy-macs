@@ -1,0 +1,356 @@
+* WHATEVER
+
+Let's do lexical binding for shit
+
+#+begin_src emacs-lisp
+;; -*- lexical-binding: t; -*-
+#+end_src
+
+
+#+begin_src emacs-lisp
+(setq doom-font (font-spec :family "xos4 Terminus" :size 15)
+      doom-variable-pitch-font (font-spec :family "sans" :size 13)
+      doom-big-font (font-spec :family "Source code pro"))
+;; + `doom-big-font' -- used for `doom-big-font-mode'; use this for
+
+(setq doom-theme 'doom-betterbox)
+
+;; This determines the style of line numbers in effect. If set to `nil', line
+;; numbers are disabled. For relative line numbers, set this to `relative'.
+(setq display-line-numbers-type t)
+
+(setq user-full-name "ElKowar"
+      user-mail-address "lkowarschick@gmail.com")
+
+(setq org-directory "~/org/")
+(setq x-select-enable-clipboard-manager nil)
+
+(setq which-key-idle-delay 0.25)
+
+
+(map! :g "<escape>" #'keyboard-quit)
+
+(map! "C-n" nil)
+
+
+(global-display-line-numbers-mode 0)
+
+#+end_src
+
+#+BEGIN_SRC emacs-lisp
+(custom-set-faces!
+  '(doom-dashboard-banner :foreground "#8ec07c" :background "#282828" :weight bold)
+  '(doom-dashboard-footer :inherit font-lock-constant-face)
+  '(doom-dashboard-footer-icon :inherit all-the-icons-red)
+  '(doom-dashboard-loaded :inherit font-lock-warning-face)
+  '(doom-dashboard-menu-desc :inherit font-lock-string-face)
+  '(doom-dashboard-menu-title :inherit font-lock-function-name-face))
+#+END_SRC
+
+
+#+begin_src emacs-lisp
+(after! rainbow-delimiters-mode (rainbow-delimiters-mode 1))
+#+end_src
+
+
+* Org-mode codeblocks
+
+Let's make org-mode codeblocks look good!
+
+For this, we first set the code-block background and make it extend to the full width.
+Additionally, we make the top and bottom lines of the block smaller and darker.
+#+begin_src emacs-lisp
+(after! org
+  (set-face-attribute 'org-block nil
+                      :background "#1d2021"
+                      :extend t)
+  (cl-loop for face in '(org-block-begin-line org-block-end-line) do
+           (set-face-attribute face nil
+                               :foreground "#504945"
+                               :background  "#1a1d1e"
+                               :height 0.8
+                               :extend t)))
+
+#+end_src
+
+
+* general.el
+
+#+BEGIN_SRC emacs-lisp
+(map! :leader
+ ;; "f" 'counsel-find-file
+ "1" 'delete-other-windows
+ "0" 'delete-window
+ "p" '(:keymap projectile-command-map))
+
+(map! :leader
+      (:prefix ("y" . "Emacs")
+        :desc "open config"   "c" '(lambda () (interactive) (find-file "~/.doom.d/config.org"))
+        :desc "reload config" "r" #'+literate/reload))
+#+END_SRC
+
+* Window management
+#+BEGIN_SRC emacs-lisp
+(map! :leader
+      :desc "Last buffer"  "w" 'evil-switch-to-windows-last-buffer
+      :desc "previous tab" "h" 'centaur-tabs-backward
+      :desc "next tab"     "l" 'centaur-tabs-forward
+
+      (:prefix ("b" . "Window management")
+       :desc "kill buffer"                   "c" #'kill-current-buffer
+       :desc "close window"                  "w" #'delete-window
+       :desc "Switch to file"                "f" #'counsel-buffer-or-recentf
+       :desc "Switch buffer"                 "b" #'switch-to-buffer
+       :desc "Switch buffer in other window" "o" #'counsel-switch-buffer-other-window
+       :desc "close window buffer"           "d" #'kill-buffer-and-window
+       :desc "h-split"                       "s" #'split-window-below
+       :desc "v-split"                       "v" #'split-window-right))
+#+END_SRC
+* Insert shit
+
+#+BEGIN_SRC emacs-lisp
+(map! :leader
+      (:prefix-map ("i" . "insert")
+       :desc "Emoji"                         "e"   #'emojify-insert-emoji
+       :desc "Current file name"             "f"   #'+default/insert-file-path
+       :desc "Current file path"             "F"   (cmd!! #'+default/insert-file-path t)
+       :desc "From evil register"            "r"   #'evil-ex-registers
+       :desc "Snippet"                       "s"   #'yas-insert-snippet
+       :desc "Unicode"                       "u"   #'unicode-chars-list-chars
+       :desc "From clipboard"                "y"   #'+default/yank-pop))
+#+END_SRC
+
+
+* File management shit
+#+begin_src emacs-lisp
+(map! :leader
+      (:prefix-map ("f" . "file")
+       :desc "Find directory"              "d"   #'+default/dired
+       :desc "Find file in emacs.d"        "e"   #'+default/find-in-emacsd
+       :desc "Browse emacs.d"              "E"   #'+default/browse-emacsd
+       :desc "Find file"                   "f"   #'find-file
+       :desc "Find file from here"         "F"   #'+default/find-file-under-here
+       :desc "Locate file"                 "l"   #'locate
+       :desc "Browse private config"       "p"   #'doom/open-private-config
+       :desc "Recent files"                "r"   #'recentf-open-files
+       :desc "Sudo this file"              "u"   #'doom/sudo-this-file))
+#+end_src
+
+
+* Open shit
+
+#+BEGIN_SRC emacs-lisp
+(map! :leader
+      (:prefix-map ("o" . "open")
+       :desc "Org agenda"       "A"  #'org-agenda
+       (:prefix ("a" . "org agenda")
+        :desc "Agenda"         "a"  #'org-agenda
+        :desc "Todo list"      "t"  #'org-todo-list
+        :desc "Tags search"    "m"  #'org-tags-view
+        :desc "View search"    "v"  #'org-search-view)
+       :desc "Default browser"    "b"  #'browse-url-of-file
+       :desc "Start debugger"     "d"  #'+debugger/start
+       :desc "New frame"          "f"  #'make-frame
+       :desc "REPL"               "r"  #'+eval/open-repl-other-window
+       :desc "REPL (same window)" "R"  #'+eval/open-repl-same-window
+       :desc "Dired"              "-"  #'dired-jump
+       (:when (featurep! :ui neotree)
+        :desc "Project sidebar"              "p" #'+neotree/open
+        :desc "Find file in project sidebar" "P" #'+neotree/find-this-file)
+       (:when (featurep! :ui treemacs)
+        :desc "Project sidebar" "p" #'+treemacs/toggle
+        :desc "Find file in project sidebar" "P" #'treemacs-find-file)
+       (:when (featurep! :term shell)
+        :desc "Toggle shell popup"    "t" #'+shell/toggle
+        :desc "Open shell here"       "T" #'+shell/here)
+       (:when (featurep! :term term)
+        :desc "Toggle terminal popup" "t" #'+term/toggle
+        :desc "Open terminal here"    "T" #'+term/here)
+       (:when (featurep! :term vterm)
+        :desc "Toggle vterm popup"    "t" #'+vterm/toggle
+        :desc "Open vterm here"       "T" #'+vterm/here)
+       (:when (featurep! :term eshell)
+        :desc "Toggle eshell popup"   "e" #'+eshell/toggle
+        :desc "Open eshell here"      "E" #'+eshell/here)))
+#+END_SRC
+
+
+* Project shit
+
+#+BEGIN_SRC emacs-lisp
+(map! :leader
+      (:prefix-map ("p" . "project")
+       :desc "Browse project"               "." #'+default/browse-project
+       :desc "Run cmd in project root"      "!" #'projectile-run-shell-command-in-root
+       :desc "Add new project"              "a" #'projectile-add-known-project
+       :desc "Switch to project buffer"     "b" #'projectile-switch-to-buffer
+       :desc "Compile in project"           "c" #'projectile-compile-project
+       :desc "Repeat last command"          "C" #'projectile-repeat-last-command
+       :desc "Remove known project"         "d" #'projectile-remove-known-project
+       :desc "Discover projects in folder"  "D" #'+default/discover-projects
+       :desc "Edit project .dir-locals"     "e" #'projectile-edit-dir-locals
+       :desc "Find file in project"         "f" #'projectile-find-file
+       :desc "Find file in other project"   "F" #'doom/find-file-in-other-project
+       :desc "Configure project"            "g" #'projectile-configure-project
+       :desc "Invalidate project cache"     "i" #'projectile-invalidate-cache
+       :desc "Kill project buffers"         "k" #'projectile-kill-buffers
+       :desc "Find other file"              "o" #'projectile-find-other-file
+       :desc "Switch project"               "p" #'projectile-switch-project
+       :desc "Find recent project files"    "r" #'projectile-recentf
+       :desc "Run project"                  "R" #'projectile-run-project
+       :desc "Save project files"           "s" #'projectile-save-project-buffers
+       :desc "List project todos"           "t" #'magit-todos-list
+       :desc "Test project"                 "T" #'projectile-test-project
+       :desc "Pop up scratch buffer"        "x" #'doom/open-project-scratch-buffer))
+#+END_SRC
+
+
+* Toggle stuff
+#+BEGIN_SRC emacs-lisp
+(map! :leader
+      (:prefix-map ("t" . "toggle")
+       :desc "Big mode"                     "b" #'doom-big-font-mode
+       (:when (featurep! :ui fill-column)
+        :desc "Fill Column Indicator"       "c" #'+fill-column/toggle)
+       :desc "Flymake"                      "f" #'flymake-mode
+       (:when (featurep! :checkers syntax)
+        :desc "Flycheck"                   "f" #'flycheck-mode)
+       :desc "Frame fullscreen"             "F" #'toggle-frame-fullscreen
+       :desc "Evil goggles"                 "g" #'evil-goggles-mode
+       (:when (featurep! :ui indent-guides)
+        :desc "Indent guides"              "i" #'highlight-indent-guides-mode)
+       :desc "Indent style"                 "I" #'doom/toggle-indent-style
+       :desc "Line numbers"                 "l" #'doom/toggle-line-numbers
+       (:when (featurep! :ui minimap)
+        :desc "Minimap"                      "m" #'minimap-mode)
+       (:when (featurep! :lang org +present)
+        :desc "org-tree-slide mode"        "p" #'org-tree-slide-mode)
+       :desc "Read-only mode"               "r" #'read-only-mode
+       (:when (and (featurep! :checkers spell) (not (featurep! :checkers spell +flyspell)))
+        :desc "Spell checker"              "s" #'spell-fu-mode)
+       (:when (featurep! :checkers spell +flyspell)
+        :desc "Spell checker"              "s" #'flyspell-mode)
+       (:when (featurep! :editor word-wrap)
+        :desc "Soft line wrapping"         "w" #'+word-wrap-mode)
+       (:when (featurep! :ui zen)
+        :desc "Zen mode"                   "z" #'writeroom-mode)))
+#+END_SRC
+
+* Make mode line less shit
+
+#+BEGIN_SRC emacs-lisp
+(after! doom-modeline
+  (custom-set-faces!
+    '(mode-line :background "#1d2021")))
+
+(setq window-divider-default-bottom-width 0)
+
+;; apparently this improves performance, see ""
+(setq inhibit-compacting-font-caches t)
+
+#+END_SRC
+
+* lsp stuff
+
+#+BEGIN_SRC emacs-lisp
+(after! rustic
+  (setq rustic-lsp-server 'rust-analyzer))
+
+
+(after! company
+        (map! :i "C-SPC" #'company-complete)
+        (map! :map company-active-map
+              "C-n" #'company-select-next
+              "C-p" #'company-select-previous)
+        (map! :map company-search-map
+              "C-n" #'company-select-next
+              "C-p" #'company-select-previous))
+
+
+#+END_SRC
+
+
+
+* company should not be ugly, plox
+
+#+BEGIN_SRC emacs-lisp
+(after! company
+  (custom-set-faces!
+    '(company-tooltip :background "#1d2021")))
+#+END_SRC
+
+
+
+* lsp binds
+
+
+#+BEGIN_SRC emacs-lisp
+(map! :leader
+      ;;; <leader> c --- code
+      (:prefix-map ("c" . "code")
+       (:when (and (featurep! :tools lsp) (not (featurep! :tools lsp +eglot)))
+        :desc "LSP Execute code action" "a" #'lsp-execute-code-action
+        :desc "LSP Organize imports" "o" #'lsp-organize-imports
+        (:when (featurep! :completion ivy)
+         :desc "Jump to symbol in current workspace" "j"   #'lsp-ivy-workspace-symbol
+         :desc "Jump to symbol in any workspace"     "J"   #'lsp-ivy-global-workspace-symbol)
+        (:when (featurep! :completion helm)
+         :desc "Jump to symbol in current workspace" "j"   #'helm-lsp-workspace-symbol
+         :desc "Jump to symbol in any workspace"     "J"   #'helm-lsp-global-workspace-symbol)
+        :desc "LSP"                                  "l"   #'+default/lsp-command-map
+        :desc "LSP Rename"                           "r"   #'lsp-rename)
+       (:when (featurep! :tools lsp +eglot)
+        :desc "LSP Execute code action" "a" #'eglot-code-actions
+        :desc "LSP Rename" "r" #'eglot-rename
+        :desc "LSP Find declaration" "j" #'eglot-find-declaration)
+       :desc "Compile"                               "c"   #'compile
+       :desc "Recompile"                             "C"   #'recompile
+       :desc "Jump to definition"                    "d"   #'+lookup/definition
+       :desc "Jump to references"                    "D"   #'+lookup/references
+       :desc "Evaluate buffer/region"                "e"   #'+eval/buffer-or-region
+       :desc "Evaluate & replace region"             "E"   #'+eval:replace-region
+       :desc "Format buffer/region"                  "f"   #'+format/region-or-buffer
+       :desc "Find implementations"                  "i"   #'+lookup/implementations
+       :desc "Jump to documentation"                 "k"   #'+lookup/documentation
+       :desc "Send to repl"                          "s"   #'+eval/send-region-to-repl
+       :desc "Find type definition"                  "t"   #'+lookup/type-definition
+       :desc "Delete trailing whitespace"            "w"   #'delete-trailing-whitespace
+       :desc "Delete trailing newlines"              "W"   #'doom/delete-trailing-newlines
+       :desc "List errors"                           "x"   #'flymake-show-diagnostics-buffer
+       (:when (featurep! :checkers syntax)
+        :desc "List errors"                         "x"   #'flycheck-list-errors)))
+
+#+END_SRC
+
+
+
+* general theme fixup
+#+BEGIN_SRC emacs-lisp
+(custom-set-faces!
+  '(markdown-code-face :background "#282828"))
+
+(set-window-margins (selected-window) 1 1)
+(add-hook! '+popup-buffer-mode-hook
+  (set-window-margins (selected-window) 1 1))
+#+END_SRC
+
+
+
+* Default shit
+
+;; Here are some additional functions/macros that could help you configure Doom:
+;;
+;; - `load!' for loading external *.el files relative to this one
+;; - `use-package!' for configuring packages
+;; - `after!' for running code after a package has loaded
+;; - `add-load-path!' for adding directories to the `load-path', relative to
+;;   this file. Emacs searches the `load-path' when you load packages with
+;;   `require' or `use-package'.
+;; - `map!' for binding new keys
+;;
+;; To get information about any of these functions/macros, move the cursor over
+;; the highlighted symbol at press 'K' (non-evil users must press 'C-c c k').
+;; This will open documentation for it, including demos of how they are used.
+;;
+;; You can also try 'gd' (or 'C-c c d') to jump to their definition and see how
+;; they are implemented.
