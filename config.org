@@ -271,34 +271,26 @@ Additionally, we make the top and bottom lines of the block smaller and darker.
 
 
 
-
-;;(after! lsp-ui
-;;        (setq lsp-ui-doc-enable 1)
-;;        (setq lsp-ui-doc-show-with-cursor 1)
-;;        (setq lsp-ui-doc-position "at-point")
-;;        (setq lsp-ui-doc-max-width 200)
-;;        (setq lsp-ui-doc-max-height 50)
-;;        (setq lsp-ui-doc-use-webkit t)
-;;        (setq lsp-ui-doc-border 'unspecified)
-;;        (setq lsp-ui-peek-enable 1))
-
-
-
-(use-package! lsp-ui
-  :after lsp-mode
-  :hook (lsp-mode . lsp-ui-mode)
-  :custom
-  (lsp-ui-doc-enable 1)
-  (lsp-ui-doc-position 'bottom)
-  (lsp-ui-doc-max-width 200)
-  (lsp-ui-doc-max-height 50)
-  (lsp-ui-doc-use-webkit t)
-  (lsp-ui-doc-border 'unspecified)
-  (lsp-ui-peek-enable 1))
-
+(after! lsp-ui
+  (setq lsp-ui-doc-enable 1)
+  (setq lsp-ui-doc-position 'bottom)
+  (setq lsp-ui-doc-max-width 200)
+  (setq lsp-ui-doc-max-height 50)
+  (setq lsp-ui-doc-use-webkit t)
+  (setq lsp-ui-doc-border 'unspecified)
+  (setq lsp-ui-peek-enable 1))
 
 #+END_SRC
 
+
+* Make error stuff focus itself once opened
+#+BEGIN_SRC emacs-lisp
+(after! flycheck
+  (set-popup-rule! "^\\*Flycheck errors\\*" :select t))
+#+END_SRC
+
+** TODO and close itself once a value has been selected
+check =flycheck-error-list-mode-map= and add to the function that is being called on RET.
 
 
 * company should not be ugly, plox
@@ -357,6 +349,7 @@ Additionally, we make the top and bottom lines of the block smaller and darker.
        :desc "Show diagnostics buffer"               "w"   #'lsp-diagnostics--flycheck-buffer
        :desc "Compile"                               "c"   #'compile
        :desc "Compile"                               "C"   #'recompile
+       :desc "Open imenu"                            "k"   #'lsp-ui-imenu
        :desc "Show documentation"                    "d"   #'lsp-ui-doc-glance))
 #+END_SRC
 
@@ -393,6 +386,9 @@ Additionally, we make the top and bottom lines of the block smaller and darker.
 (after! centaur-tabs
     (setq centaur-tabs-style "box"))
 #+END_SRC
+
+
+
 
 
 
