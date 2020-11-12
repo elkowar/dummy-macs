@@ -2,6 +2,12 @@
 ;;; $DOOMDIR/packages.el
 
 
+(package! flycheck-rust)
+(package! flycheck-inline)
+(package! quick-peek)
+
+
+(package! org-bullets)
 
 ;; (package! company-box)
 

@@ -1,41 +1,62 @@
-* WHATEVER
-
-Let's do lexical binding for shit
+* Basics
+** Fix defaults
+Lexical binding may improve performance,... but probably not really.
+Let's still do it.
 
 #+begin_src emacs-lisp
 ;; -*- lexical-binding: t; -*-
 #+end_src
 
-
+Let's also fix the indentation.
 #+begin_src emacs-lisp
+(setq-default indent-tabs-mode nil)
+(setq tabs-width 4)
+
+#+end_src
+
+Let's disable x clipboard stuff, as it breaks closing emacs.
+#+BEGIN_SRC emacs-lisp
+(setq x-select-enable-clipboard-manager nil)
+#+end_src
+
+We set these variables as they may be used for stuff, idk
+#+BEGIN_SRC emacs-lisp
+(setq user-full-name "ElKowar"
+      user-mail-address "lkowarschick@gmail.com")
+(setq org-directory "~/org/")
+#+end_src
+
+Fix some basic keybindings
+#+BEGIN_SRC emacs-lisp
+(map! :g
+      "<escape>" #'keyboard-quit
+      "C-n" nil
+      "C-p" nil)
+(setq doom-localleader-key "SPC x")
+#+end_src
+
+apparently this improves performance...
+#+BEGIN_SRC emacs-lisp
+(setq inhibit-compacting-font-caches t)
+#+end_src
+
+* TODO UI Fancyfication
+** Basics
+Let's set a colorscheme and disable line-numbers
+#+BEGIN_SRC emacs-lisp
+(setq doom-theme 'doom-betterbox)
+(setq display-line-numbers-type nil)
+#+END_SRC
+
+and set the font.
+#+BEGIN_SRC emacs-lisp
 (setq doom-font (font-spec :family "xos4 Terminus" :size 15)
       doom-variable-pitch-font (font-spec :family "sans" :size 13)
       doom-big-font (font-spec :family "Source code pro"))
 ;; + `doom-big-font' -- used for `doom-big-font-mode'; use this for
-
-(setq doom-theme 'doom-betterbox)
-
-;; This determines the style of line numbers in effect. If set to `nil', line
-;; numbers are disabled. For relative line numbers, set this to `relative'.
-(setq display-line-numbers-type t)
-
-(setq user-full-name "ElKowar"
-      user-mail-address "lkowarschick@gmail.com")
-
-(setq org-directory "~/org/")
-(setq x-select-enable-clipboard-manager nil)
-
-(map! :g "<escape>" #'keyboard-quit)
-
-(map! "C-n" nil)
-(map! "C-p" nil)
-
-(setq doom-localleader-key "SPC x")
-
-(setq display-line-numbers-type nil)
-
 #+end_src
 
+Let's fix the optics of the Doom Dashboard.
 #+BEGIN_SRC emacs-lisp
 (custom-set-faces!
   '(doom-dashboard-banner :foreground "#8ec07c" :background "#282828" :weight bold)
@@ -47,13 +68,72 @@ Let's do lexical binding for shit
 #+END_SRC
 
 
+#+BEGIN_SRC emacs-lisp
+(custom-set-faces!
+  '(markdown-code-face :inherit :background :background nil))
+
+(add-hook! '+popup-buffer-mode-hook
+  (set-window-margins (selected-window) 2 2))
+
+(after! centaur-tabs
+    (setq centaur-tabs-style "box"))
+#+END_SRC
+
+Hide code block start indicators
+#+BEGIN_SRC emacs-lisp
+(setq-default prettify-symbols-alist '(("#+BEGIN_SRC" . "†")
+                                       ("#+END_SRC" . "†")
+                                       ("#+begin_src" . "†")
+                                       ("#+end_src" . "†")))
+#+END_SRC
+
+
+Rainbows are fabulous!
 #+begin_src emacs-lisp
 (after! rainbow-delimiters-mode (rainbow-delimiters-mode 1))
 #+end_src
 
+** company should not be ugly, plox
 
-* Org-mode codeblocks
+#+BEGIN_SRC emacs-lisp
+(after! company
+  (custom-set-faces!
+    '(company-tooltip :background "#1d2021")))
+#+END_SRC
 
+** Make mode line less shit
+#+BEGIN_SRC emacs-lisp
+(after! doom-modeline
+  (custom-set-faces!
+    '(mode-line :background "#1d2021")))
+;;    '(doom-modeline-buffer-path :font 'unspecified)
+;;    '(doom-modeline-project-dir :font 'unspecified)))
+
+(setq window-divider-default-bottom-width 0)
+
+#+END_SRC
+
+* Org-mode
+** General
+
+#+BEGIN_SRC emacs-lisp
+(after! org
+  (custom-set-faces!
+    '(outline-1 :weight normal)
+    '(outline-2 :weight normal)
+    '(outline-3 :weight normal)
+    '(outline-4 :weight normal)
+    '(outline-5 :weight normal)))
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+(after! (org org-bullets)
+  (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
+  (setq org-bullets-bullet-list '("◆" "◆" "◆" "◆" "◆" "◆" "◆" "◆" "◆")))
+
+#+END_SRC
+
+** codeblocks
 Let's make org-mode codeblocks look good!
 
 For this, we first set the code-block background and make it extend to the full width.
@@ -72,12 +152,10 @@ Additionally, we make the top and bottom lines of the block smaller and darker.
 
 #+end_src
 
-
-* general.el
-
+* General Keybindings
+** Basics
 #+BEGIN_SRC emacs-lisp
 (map! :leader
- ;; "f" 'counsel-find-file
  "1" 'delete-other-windows
  "0" 'delete-window
  "p" '(:keymap projectile-command-map))
@@ -87,8 +165,7 @@ Additionally, we make the top and bottom lines of the block smaller and darker.
         :desc "open config"   "c" '(lambda () (interactive) (find-file "~/.doom.d/config.org"))
         :desc "reload config" "r" #'+literate/reload))
 #+END_SRC
-
-* Window management
+** Window management
 #+BEGIN_SRC emacs-lisp
 (map! :leader
       :desc "Last buffer"  "w" 'evil-switch-to-windows-last-buffer
@@ -108,22 +185,7 @@ Additionally, we make the top and bottom lines of the block smaller and darker.
        :desc "h-split"                       "s" #'split-window-below
        :desc "v-split"                       "v" #'split-window-right))
 #+END_SRC
-* Insert shit
-
-#+BEGIN_SRC emacs-lisp
-(map! :leader
-      (:prefix-map ("i" . "insert")
-       :desc "Emoji"                         "e"   #'emojify-insert-emoji
-       :desc "Current file name"             "f"   #'+default/insert-file-path
-       :desc "Current file path"             "F"   (cmd!! #'+default/insert-file-path t)
-       :desc "From evil register"            "r"   #'evil-ex-registers
-       :desc "Snippet"                       "s"   #'yas-insert-snippet
-       :desc "Unicode"                       "u"   #'unicode-chars-list-chars
-       :desc "From clipboard"                "y"   #'+default/yank-pop))
-#+END_SRC
-
-
-* File management shit
+** File management shit
 #+begin_src emacs-lisp
 (map! :leader
       (:prefix-map ("f" . "file")
@@ -138,8 +200,7 @@ Additionally, we make the top and bottom lines of the block smaller and darker.
        :desc "Sudo this file"              "u"   #'doom/sudo-this-file))
 #+end_src
 
-
-* Open shit
+** Open shit
 
 #+BEGIN_SRC emacs-lisp
 (map! :leader
@@ -176,8 +237,7 @@ Additionally, we make the top and bottom lines of the block smaller and darker.
         :desc "Open eshell here"      "E" #'+eshell/here)))
 #+END_SRC
 
-
-* Project shit
+** Project shit
 
 #+BEGIN_SRC emacs-lisp
 (map! :leader
@@ -206,15 +266,11 @@ Additionally, we make the top and bottom lines of the block smaller and darker.
        :desc "Pop up scratch buffer"        "x" #'doom/open-project-scratch-buffer))
 #+END_SRC
 
-
-* Toggle stuff
+** Toggle stuff
 #+BEGIN_SRC emacs-lisp
 (map! :leader
       (:prefix-map ("t" . "toggle")
        :desc "Big mode"                     "b" #'doom-big-font-mode
-       (:when (featurep! :ui fill-column)
-        :desc "Fill Column Indicator"       "c" #'+fill-column/toggle)
-       :desc "Flymake"                      "f" #'flymake-mode
        (:when (featurep! :checkers syntax)
         :desc "Flycheck"                   "f" #'flycheck-mode)
        :desc "Frame fullscreen"             "F" #'toggle-frame-fullscreen
@@ -223,41 +279,41 @@ Additionally, we make the top and bottom lines of the block smaller and darker.
         :desc "Indent guides"              "i" #'highlight-indent-guides-mode)
        :desc "Indent style"                 "I" #'doom/toggle-indent-style
        :desc "Line numbers"                 "l" #'doom/toggle-line-numbers
-       (:when (featurep! :ui minimap)
-        :desc "Minimap"                      "m" #'minimap-mode)
-       (:when (featurep! :lang org +present)
-        :desc "org-tree-slide mode"        "p" #'org-tree-slide-mode)
-       :desc "Read-only mode"               "r" #'read-only-mode
-       (:when (and (featurep! :checkers spell) (not (featurep! :checkers spell +flyspell)))
-        :desc "Spell checker"              "s" #'spell-fu-mode)
        (:when (featurep! :checkers spell +flyspell)
         :desc "Spell checker"              "s" #'flyspell-mode)
-       (:when (featurep! :editor word-wrap)
-        :desc "Soft line wrapping"         "w" #'+word-wrap-mode)
        (:when (featurep! :ui zen)
         :desc "Zen mode"                   "z" #'writeroom-mode)))
 #+END_SRC
 
-* Make mode line less shit
-
+** Insert shit
 #+BEGIN_SRC emacs-lisp
-(after! doom-modeline
-  (custom-set-faces!
-    '(mode-line :background "#1d2021")))
-
-(setq window-divider-default-bottom-width 0)
-
-;; apparently this improves performance, see ""
-(setq inhibit-compacting-font-caches t)
-
+(map! :leader
+      (:prefix-map ("i" . "insert")
+       :desc "Emoji"                 "e" #'emojify-insert-emoji
+       :desc "Current file name"     "f" #'+default/insert-file-path
+       :desc "Current file path"     "F" (cmd!! #'+default/insert-file-path t)
+       :desc "From evil register"    "r" #'evil-ex-registers
+       :desc "Snippet"               "s" #'yas-insert-snippet
+       :desc "Unicode"               "u" #'unicode-chars-list-chars
+       :desc "From clipboard"        "y" #'+default/yank-pop))
 #+END_SRC
-
 * lsp stuff
 
 #+BEGIN_SRC emacs-lisp
 (after! rustic
-  (setq rustic-lsp-server 'rust-analyzer))
+  (setq rustic-lsp-server 'rust-analyzer)
+  (add-hook 'flycheck-mode-hook  #'flycheck-rust-setup))
 
+(after! flycheck
+  (add-hook 'flycheck-mode-hook #'flycheck-inline-mode))
+;;  (setq flycheck-inline-display-function
+;;      (lambda (msg pos)
+;;        (let* ((ov (quick-peek-overlay-ensure-at pos))
+;;               (contents (quick-peek-overlay-contents ov)))
+;;          (setf (quick-peek-overlay-contents ov)
+;;                (concat contents (when contents "\n") msg))
+;;          (quick-peek-update ov)))
+;;      flycheck-inline-clear-function #'quick-peek-hide))
 
 (after! company
         (map! :i "C-SPC" #'company-complete)
@@ -273,140 +329,68 @@ Additionally, we make the top and bottom lines of the block smaller and darker.
 
 (after! lsp-ui
   (setq lsp-ui-doc-enable 1)
-  (setq lsp-ui-doc-position 'bottom)
+  (setq lsp-ui-doc-position 'at-point)
+  (setq lsp-ui-doc-show-with-cursor nil)
   (setq lsp-ui-doc-max-width 200)
   (setq lsp-ui-doc-max-height 50)
-  (setq lsp-ui-doc-use-webkit t)
+  (setq lsp-ui-doc-use-webkit nil)
   (setq lsp-ui-doc-border 'unspecified)
   (setq lsp-ui-peek-enable 1))
 
+
+(flycheck-popup-tip-mode 1)
+
+
+;; NOTE: lsp-workspace-folders-remove
+(after! lsp-haskell
+  (setq lsp-haskell-server-path "haskell-language-server-wrapper"))
+
+(custom-set-faces!
+  '(font-lock-doc-face :foreground "#928374"))
+
+#+END_SRC
+
+** lsp binds
+#+BEGIN_SRC emacs-lisp
+(map! :leader
+      (:prefix-map ("m" . "Code")
+       :desc "LSP"                        "l" #'+default/lsp-command-map
+       :desc "Rename symbol"              "r" #'lsp-rename
+       :desc "Go to definition"           "g" #'+lookup/definition
+       :desc "Go to type-definition"      "t" #'+lookup/type-definition
+    ;; :desc "Find references"            "r" #'+lookup/references
+       :desc "Find references"            "r" #'lsp-ui-peek-find-references
+       :desc "Go to implementation"       "i" #'+lookup/implementations
+       :desc "Format"                     "f" #'+format/region-or-buffer
+       :desc "Find symbols"               "s" #'lsp-ivy-global-workspace-symbol
+       :desc "List errors"                "e" #'flycheck-list-errors
+       :desc "Show diagnostics buffer"    "w" #'lsp-diagnostics--flycheck-buffer
+       :desc "Compile"                    "c" #'compile
+       :desc "Compile"                    "C" #'recompile
+       :desc "Open imenu"                 "k" #'lsp-ui-imenu
+       :desc "Execute code action"        "v" #'lsp-execute-code-action
+       :desc "Show documentation"         "d" #'lsp-ui-doc-show ;; #'lsp-ui-doc-glance
+       :desc "Focus documentation"        "D" #'lsp-ui-doc-focus-frame))
 #+END_SRC
 
 
-* Make error stuff focus itself once opened
+** Make error stuff focus itself once opened
 #+BEGIN_SRC emacs-lisp
 (after! flycheck
   (set-popup-rule! "^\\*Flycheck errors\\*" :select t))
 #+END_SRC
-
-** TODO and close itself once a value has been selected
+** TODO and close itself once a value  been selected
 check =flycheck-error-list-mode-map= and add to the function that is being called on RET.
 
 
-* company should not be ugly, plox
 
+* In progress
+
+* TODO-List
+
+
+
+** Fix counsel shit
 #+BEGIN_SRC emacs-lisp
-(after! company
-  (custom-set-faces!
-    '(company-tooltip :background "#1d2021")))
-#+END_SRC
-
-
-
-* lsp binds
-
-
-#+BEGIN_SRC emacs-lisp
-;;(map! :leader
-;;      (:prefix-map ("m" . "Code")
-;;       (:when (and (featurep! :tools lsp) (not (featurep! :tools lsp +eglot)))
-;;        :desc "LSP Execute code action" "a" #'lsp-execute-code-action
-;;        :desc "LSP Organize imports" "o" #'lsp-organize-imports
-;;        (:when (featurep! :completion ivy)
-;;         :desc "Jump to symbol in current workspace" "j"   #'lsp-ivy-workspace-symbol
-;;         :desc "Jump to symbol in any workspace"     "J"   #'lsp-ivy-global-workspace-symbol
-;;        :desc "LSP"                                  "l"   #'+default/lsp-command-map
-;;        :desc "LSP Rename"                           "r"   #'lsp-rename
-;;       :desc "Compile"                               "c"   #'compile
-;;       :desc "Recompile"                             "C"   #'recompile
-;;       :desc "Jump to definition"                    "d"   #'+lookup/definition
-;;       :desc "Jump to references"                    "D"   #'+lookup/references
-;;       :desc "Evaluate buffer/region"                "e"   #'+eval/buffer-or-region
-;;       :desc "Evaluate & replace region"             "E"   #'+eval:replace-region
-;;       :desc "Format buffer/region"                  "f"   #'+format/region-or-buffer
-;;       :desc "Find implementations"                  "i"   #'+lookup/implementations
-;;       :desc "Jump to documentation"                 "k"   #'+lookup/documentation
-;;       :desc "Send to repl"                          "s"   #'+eval/send-region-to-repl
-;;       :desc "Find type definition"                  "t"   #'+lookup/type-definition
-;;       :desc "Delete trailing whitespace"            "w"   #'delete-trailing-whitespace
-;;       :desc "Delete trailing newlines"              "W"   #'doom/delete-trailing-newlines
-;;       :desc "List errors"                           "x"   #'flymake-show-diagnostics-buffer
-;;       (:when (featurep! :checkers syntax)
-;;        :desc "List errors"                         "x"   #'flycheck-list-errors
-
-(map! :leader
-      (:prefix-map ("m" . "Code")
-       :desc "LSP"                                  "l"   #'+default/lsp-command-map
-       :desc "Rename symbol"                         "r"   #'lsp-rename
-       :desc "Go to definition"                      "g"   #'+lookup/definition
-       :desc "Go to type-definition"                 "t"   #'+lookup/type-definition
-       ;; :desc "Find references"                       "r"   #'+lookup/references
-       :desc "Find references"                       "r"   #'lsp-ui-peek-find-references
-       :desc "Go to implementation"                  "i"   #'+lookup/implementations
-       :desc "Format"                                "f"   #'+format/region-or-buffer
-       :desc "Find symbols"                          "s"   #'lsp-ivy-global-workspace-symbol
-       :desc "List errors"                           "e"   #'flycheck-list-errors
-       :desc "Show diagnostics buffer"               "w"   #'lsp-diagnostics--flycheck-buffer
-       :desc "Compile"                               "c"   #'compile
-       :desc "Compile"                               "C"   #'recompile
-       :desc "Open imenu"                            "k"   #'lsp-ui-imenu
-       :desc "Show documentation"                    "d"   #'lsp-ui-doc-glance))
-#+END_SRC
-
-
-* Fix counsel shit
-
-#+BEGIN_SRC emacs-lisp
-
 ;; (counsel-find-file-map)
 #+END_SRC
-
-
-
-
-* general theme fixup
-#+BEGIN_SRC emacs-lisp
-(custom-set-faces!
-  '(markdown-code-face :inherit :background :background nil))
-  ;;'(markdown-code-face :background "#282828"))
-
-
-;;(after! markdown
-;;  (set-face-attribute 'markdown-code-face nil :inherit :background :background nil))
-
-(add-hook 'window-configuration-change-hook
-          (lambda ()
-            (set-window-margins (car (get-buffer-window-list (current-buffer) nil t)) 2 2)))
-
-(set-window-margins (selected-window) 2 2)
-(add-hook! '+popup-buffer-mode-hook
-  (set-window-margins (selected-window) 2 2))
-
-
-(after! centaur-tabs
-    (setq centaur-tabs-style "box"))
-#+END_SRC
-
-
-
-
-
-
-* Default shit
-
-;; Here are some additional functions/macros that could help you configure Doom:
-;;
-;; - `load!' for loading external *.el files relative to this one
-;; - `use-package!' for configuring packages
-;; - `after!' for running code after a package has loaded
-;; - `add-load-path!' for adding directories to the `load-path', relative to
-;;   this file. Emacs searches the `load-path' when you load packages with
-;;   `require' or `use-package'.
-;; - `map!' for binding new keys
-;;
-;; To get information about any of these functions/macros, move the cursor over
-;; the highlighted symbol at press 'K' (non-evil users must press 'C-c c k').
-;; This will open documentation for it, including demos of how they are used.
-;;
-;; You can also try 'gd' (or 'C-c c d') to jump to their definition and see how
-;; they are implemented.

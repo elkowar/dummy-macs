@@ -4,7 +4,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
-   '("37144b437478e4c235824f0e94afa740ee2c7d16952e69ac3c5ed4352209eefb" "8e959d5a6771b4d1e2177263e1c1e62c62c0f848b265e9db46f18754ea1c1998" default))
+   '("c39b509b3517d705d3a89e01dde11cbc817408f39d466b5cff5acc0f4f5ca1c1" "37144b437478e4c235824f0e94afa740ee2c7d16952e69ac3c5ed4352209eefb" "8e959d5a6771b4d1e2177263e1c1e62c62c0f848b265e9db46f18754ea1c1998" default))
  '(safe-local-variable-values
    '((lsp--override-calculate-lisp-indent\? . t)
      (flycheck-disabled-checkers quote
@@ -217,5 +217,7 @@ is the buffer position of the start of the containing expression."
  '(doom-dashboard-loaded ((t (:inherit font-lock-warning-face))))
  '(doom-dashboard-menu-desc ((t (:inherit font-lock-string-face))))
  '(doom-dashboard-menu-title ((t (:inherit font-lock-function-name-face))))
+ '(font-lock-doc-face ((t (:foreground "#928374"))))
  '(markdown-code-face ((t (:background "#282828"))))
- '(mode-line ((t (:background "#1d2021")))))
+ '(mode-line ((t (:background "#1d2021"))))
+ '(outline-1 ((t (:extend t :foreground "#fabd2f" :weight normal)))))
