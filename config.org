@@ -156,9 +156,10 @@ Additionally, we make the top and bottom lines of the block smaller and darker.
 ** Basics
 #+BEGIN_SRC emacs-lisp
 (map! :leader
- "1" 'delete-other-windows
- "0" 'delete-window
- "p" '(:keymap projectile-command-map))
+ "1" #'delete-other-windows
+ "0" #'delete-window
+ "p" '(:keymap projectile-command-map)
+ "g" #'magit-status)
 
 (map! :leader
       (:prefix ("y" . "Emacs")
@@ -172,18 +173,42 @@ Additionally, we make the top and bottom lines of the block smaller and darker.
       :desc "previous tab" "h" 'centaur-tabs-backward
       :desc "next tab"     "l" 'centaur-tabs-forward
 
-      (:prefix ("b" . "Window management")
-       :desc "kill buffer"                   "c" #'kill-current-buffer
+      (:prefix ("c" . "Window management")
+       :desc "kill buffer"                   "x" #'kill-current-buffer
        :desc "close window"                  "w" #'delete-window
        :desc "Switch to file"                "f" #'counsel-buffer-or-recentf
-       :desc "Switch buffer"                 "b" #'switch-to-buffer
+       :desc "Switch buffer"                 "c" #'switch-to-buffer
        :desc "Switch buffer in other window" "o" #'counsel-switch-buffer-other-window
        :desc "close window buffer"           "d" #'kill-buffer-and-window
        :desc "next group"                    "l" #'centaur-tabs-forward-group
        :desc "previous group"                "h" #'centaur-tabs-backward-group
        :desc "show groups"                   "j" #'centaur-tabs-toggle-groups
        :desc "h-split"                       "s" #'split-window-below
-       :desc "v-split"                       "v" #'split-window-right))
+       :desc "v-split"                       "v" #'split-window-right)
+
+      (:prefix ("u" . "Workspaces")
+       :desc "Display tab bar"           "TAB" #'+workspace/display
+       :desc "Switch workspace"          "u"   #'+workspace/switch-to
+       :desc "Switch to last workspace"  "w"   #'+workspace/other
+       :desc "New workspace"             "n"   #'+workspace/new
+       :desc "Load workspace from file"  "l"   #'+workspace/load
+       :desc "Save workspace to file"    "s"   #'+workspace/save
+       :desc "Delete session"            "x"   #'+workspace/kill-session
+       :desc "Delete this workspace"     "d"   #'+workspace/delete
+       :desc "Rename workspace"          "r"   #'+workspace/rename
+       :desc "Restore last session"      "R"   #'+workspace/restore-last-session
+       :desc "Next workspace"            "l"   #'+workspace/switch-right
+       :desc "Previous workspace"        "h"   #'+workspace/switch-left
+       :desc "Switch to 1st workspace"   "1"   #'+workspace/switch-to-0
+       :desc "Switch to 2nd workspace"   "2"   #'+workspace/switch-to-1
+       :desc "Switch to 3rd workspace"   "3"   #'+workspace/switch-to-2
+       :desc "Switch to 4th workspace"   "4"   #'+workspace/switch-to-3
+       :desc "Switch to 5th workspace"   "5"   #'+workspace/switch-to-4
+       :desc "Switch to 6th workspace"   "6"   #'+workspace/switch-to-5
+       :desc "Switch to 7th workspace"   "7"   #'+workspace/switch-to-6
+       :desc "Switch to 8th workspace"   "8"   #'+workspace/switch-to-7
+       :desc "Switch to 9th workspace"   "9"   #'+workspace/switch-to-8
+       :desc "Switch to final workspace" "0"   #'+workspace/switch-to-final))
 #+END_SRC
 ** File management shit
 #+begin_src emacs-lisp
@@ -304,8 +329,8 @@ Additionally, we make the top and bottom lines of the block smaller and darker.
   (setq rustic-lsp-server 'rust-analyzer)
   (add-hook 'flycheck-mode-hook  #'flycheck-rust-setup))
 
-(after! flycheck
-  (add-hook 'flycheck-mode-hook #'flycheck-inline-mode))
+;;(after! flycheck
+;;  (add-hook 'flycheck-mode-hook #'flycheck-inline-mode))
 ;;  (setq flycheck-inline-display-function
 ;;      (lambda (msg pos)
 ;;        (let* ((ov (quick-peek-overlay-ensure-at pos))
@@ -355,13 +380,14 @@ Additionally, we make the top and bottom lines of the block smaller and darker.
 (map! :leader
       (:prefix-map ("m" . "Code")
        :desc "LSP"                        "l" #'+default/lsp-command-map
-       :desc "Rename symbol"              "r" #'lsp-rename
+       :desc "Rename symbol"              "n" #'lsp-rename
        :desc "Go to definition"           "g" #'+lookup/definition
        :desc "Go to type-definition"      "t" #'+lookup/type-definition
     ;; :desc "Find references"            "r" #'+lookup/references
        :desc "Find references"            "r" #'lsp-ui-peek-find-references
        :desc "Go to implementation"       "i" #'+lookup/implementations
-       :desc "Format"                     "f" #'+format/region-or-buffer
+       :desc "Format"                     "f" #'lsp-format-buffer
+       :desc "Format region"              "F" #'lsp-format-region
        :desc "Find symbols"               "s" #'lsp-ivy-global-workspace-symbol
        :desc "List errors"                "e" #'flycheck-list-errors
        :desc "Show diagnostics buffer"    "w" #'lsp-diagnostics--flycheck-buffer
@@ -385,6 +411,24 @@ check =flycheck-error-list-mode-map= and add to the function that is being calle
 
 
 * In progress
+
+** Forge
+
+#+BEGIN_SRC emacs-lisp
+(setq auth-sources '("~/.authinfo"))
+#+END_SRC
+
+* Vimish-fold
+#+BEGIN_SRC emacs-lisp
+(after! vimish-fold
+  (vimish-fold-global-mode 1))
+#+END_SRC
+
+
+* Hide centaur tabs on popups
+#+BEGIN_SRC emacs-lisp
+(add-hook! '+popup-buffer-mode-hook #'centaur-tabs-local-mode)
+#+END_SRC
 
 * TODO-List
 
