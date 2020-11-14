@@ -40,6 +40,17 @@ apparently this improves performance...
 (setq inhibit-compacting-font-caches t)
 #+end_src
 
+** Forge
+
+#+BEGIN_SRC emacs-lisp
+(setq auth-sources '("~/.authinfo"))
+#+END_SRC
+** Vimish-fold
+#+BEGIN_SRC emacs-lisp
+(after! vimish-fold
+  (vimish-fold-global-mode 1))
+#+END_SRC
+
 * TODO UI Fancyfication
 ** Basics
 Let's set a colorscheme and disable line-numbers
@@ -375,6 +386,17 @@ Additionally, we make the top and bottom lines of the block smaller and darker.
 
 #+END_SRC
 
+** Basics
+#+BEGIN_SRC emacs-lisp
+(after! lsp-mode
+  (setq lsp-enable-semantic-highlighting t)
+  (setq lsp-enable-indentation t)
+  (setq lsp-enable-folding nil)
+  (setq lsp-enable-relative-indentation t)
+  (setq lsp-auto-execute-action t))
+#+END_SRC
+
+
 ** lsp binds
 #+BEGIN_SRC emacs-lisp
 (map! :leader
@@ -383,7 +405,7 @@ Additionally, we make the top and bottom lines of the block smaller and darker.
        :desc "Rename symbol"              "n" #'lsp-rename
        :desc "Go to definition"           "g" #'+lookup/definition
        :desc "Go to type-definition"      "t" #'+lookup/type-definition
-    ;; :desc "Find references"            "r" #'+lookup/references
+       ;; :desc "Find references"            "r" #'+lookup/references
        :desc "Find references"            "r" #'lsp-ui-peek-find-references
        :desc "Go to implementation"       "i" #'+lookup/implementations
        :desc "Format"                     "f" #'lsp-format-buffer
@@ -399,7 +421,6 @@ Additionally, we make the top and bottom lines of the block smaller and darker.
        :desc "Focus documentation"        "D" #'lsp-ui-doc-focus-frame))
 #+END_SRC
 
-
 ** Make error stuff focus itself once opened
 #+BEGIN_SRC emacs-lisp
 (after! flycheck
@@ -410,31 +431,15 @@ check =flycheck-error-list-mode-map= and add to the function that is being calle
 
 
 
-* In progress
-
-** Forge
-
-#+BEGIN_SRC emacs-lisp
-(setq auth-sources '("~/.authinfo"))
-#+END_SRC
-
-* Vimish-fold
-#+BEGIN_SRC emacs-lisp
-(after! vimish-fold
-  (vimish-fold-global-mode 1))
-#+END_SRC
-
 
 * Hide centaur tabs on popups
 #+BEGIN_SRC emacs-lisp
-(add-hook! '+popup-buffer-mode-hook #'centaur-tabs-local-mode)
+;; (add-hook! 'anzu-mode-hook #'centaur-tabs-local-mode)
 #+END_SRC
 
 * TODO-List
-
-
-
 ** Fix counsel shit
 #+BEGIN_SRC emacs-lisp
 ;; (counsel-find-file-map)
 #+END_SRC
+
