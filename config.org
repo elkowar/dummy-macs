@@ -113,7 +113,7 @@ Rainbows are fabulous!
     '(company-tooltip :background "#1d2021")))
 #+END_SRC
 
-** Make mode line less shit
+** Make mode line less dumb
 #+BEGIN_SRC emacs-lisp
 (after! doom-modeline
   (custom-set-faces!
@@ -139,9 +139,9 @@ Rainbows are fabulous!
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp
-(after! (org org-bullets)
-  (add-hook 'org-mode-hook (lambda () (interactive) (org-bullets-mode 1)))
-  (setq org-bullets-bullet-list '("◆" "◆" "◆" "◆" "◆" "◆" "◆" "◆" "◆")))
+(after! org-superstar
+  (setq org-superstar-headline-bullets-list '("◆" "◆" "◆")
+        org-superstar-prettify-item-bullets t ))
 
 #+END_SRC
 
@@ -244,8 +244,7 @@ Additionally, we make the top and bottom lines of the block smaller and darker.
        :desc "Sudo this file"              "u"   #'doom/sudo-this-file))
 #+end_src
 
-** Open shit
-
+** Openning stuff
 #+BEGIN_SRC emacs-lisp
 (map! :leader
       (:prefix-map ("o" . "open")
@@ -341,6 +340,22 @@ Additionally, we make the top and bottom lines of the block smaller and darker.
        :desc "Unicode"               "u" #'unicode-chars-list-chars
        :desc "From clipboard"        "y" #'+default/yank-pop))
 #+END_SRC
+** Other fixup
+*** Counsel keybindings for left/right-arrow when navigating directories
+
+When selecting files in counsel, left/right arrow should move through the file hierarchy
+#+BEGIN_SRC emacs-lisp
+(map! :map ivy-minibuffer-map
+      "<right>" (lambda () (interactive) (if ivy--directory (ivy-alt-done) (forward-char)))
+      "<left>" (lambda () (interactive) (if ivy--directory (ivy-backward-kill-word) (backward-char)))
+      "S-RET"   #'ivy-call
+      "C-RET"   #'ivy-immediately-done)
+
+(after! ivy
+  (setq ivy-extra-directories '()))
+
+#+END_SRC
+
 * lsp stuff
 
 #+BEGIN_SRC emacs-lisp
@@ -404,7 +419,6 @@ Additionally, we make the top and bottom lines of the block smaller and darker.
   (setq lsp-auto-execute-action t))
 #+END_SRC
 
-
 ** lsp binds
 #+BEGIN_SRC emacs-lisp
 (map! :leader
@@ -446,19 +460,6 @@ check =flycheck-error-list-mode-map= and add to the function that is being calle
 #+END_SRC
 
 * TODO-List
-** TODO Fix counsel shit
-#+BEGIN_SRC emacs-lisp
-(map! :map ivy-minibuffer-map
-      "<right>" #'ivy-alt-done
-      "<left>"  #'ivy-backward-kill-word
-      "S-RET"   #'ivy-call
-      "C-RET"   #'ivy-immediately-done)
-
-(after! ivy
-  (setq ivy-extra-directories '()))
-
-#+END_SRC
-
 ** Fix imenu showing modewline
 #+BEGIN_SRC emacs-lisp
 (add-hook! 'lsp-ui-imenu-mode-hook #'hide-mode-line-mode)
@@ -559,7 +560,6 @@ This is some basics that are necessary
 
 #+END_SRC
 
-
 ** DOING Padding
 
 #+BEGIN_SRC emacs-lisp
@@ -586,4 +586,22 @@ This is some basics that are necessary
 
 
 (ns/frame-set-parameter 'internal-border-width 20)
+#+END_SRC
+
+** TODO working tab line
+#+BEGIN_SRC emacs-lisp
+
+(global-tab-line-mode 1)
+;;(after! tab-line
+;;  (custom-set-faces!
+;;    '(tab-line-tab nil
+;;                   :box nil
+;;                   :foreground "blue"
+;;                   :background "#1d2021")
+;;    '(tab-line-tab-current nil
+;;                           :background "#8ec07c"
+;;                           :foreground "#282828")
+;;    '(tab-line-tab-inactive nil
+;;                            :background "#1d2021"
+;;                            :foreground "red")))
 #+END_SRC
