@@ -221,3 +221,4 @@ is the buffer position of the start of the containing expression."
  '(markdown-code-face ((t (:background "#282828"))))
  '(mode-line ((t (:background "#1d2021"))))
  '(outline-1 ((t (:extend t :foreground "#fabd2f" :weight normal)))))
+(put 'customize-face 'disabled nil)
