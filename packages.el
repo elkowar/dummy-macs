@@ -5,9 +5,8 @@
 (package! flycheck-rust)
 (package! flycheck-inline)
 (package! quick-peek)
+(package! dap-mode)
 
-
-(package! org-bullets)
 
 ;; (package! company-box)
 

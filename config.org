@@ -35,6 +35,9 @@ Fix some basic keybindings
 (setq doom-localleader-key "SPC x")
 #+end_src
 
+#+RESULTS:
+: SPC x
+
 apparently this improves performance...
 #+BEGIN_SRC emacs-lisp
 (setq inhibit-compacting-font-caches t)
@@ -152,7 +155,6 @@ Let's enable prettify-symbols-mode here:
   (add-hook 'org-mode-hook #'prettify-symbols-mode))
 #+END_SRC
 
-
 ** codeblocks
 Let's make org-mode codeblocks look good!
 
@@ -188,15 +190,17 @@ Additionally, we make the top and bottom lines of the block smaller and darker.
 ** Window management
 #+BEGIN_SRC emacs-lisp
 (map! :leader
-      :desc "Last buffer"  "w" 'evil-switch-to-windows-last-buffer
-      :desc "previous tab" "h" 'centaur-tabs-backward
-      :desc "next tab"     "l" 'centaur-tabs-forward
+      :desc "Last buffer"  "w" #'evil-switch-to-windows-last-buffer
+      ;; :desc "previous tab" "h" 'centaur-tabs-backward
+      ;; :desc "next tab"     "l" 'centaur-tabs-forward
+      :desc "previous tab" "h" #'previous-buffer
+      :desc "next tab"     "l" #'next-buffer
 
-      (:prefix ("c" . "Window management")
-       :desc "kill buffer"                   "x" #'kill-current-buffer
+      (:prefix ("b" . "Window management")
+       :desc "kill buffer"                   "c" #'kill-current-buffer
        :desc "close window"                  "w" #'delete-window
        :desc "Switch to file"                "f" #'counsel-buffer-or-recentf
-       :desc "Switch buffer"                 "c" #'switch-to-buffer
+       :desc "Switch buffer"                 "b" #'switch-to-buffer
        :desc "Switch buffer in other window" "o" #'counsel-switch-buffer-other-window
        :desc "close window buffer"           "d" #'kill-buffer-and-window
        :desc "next group"                    "l" #'centaur-tabs-forward-group
@@ -340,6 +344,7 @@ Additionally, we make the top and bottom lines of the block smaller and darker.
        :desc "Unicode"               "u" #'unicode-chars-list-chars
        :desc "From clipboard"        "y" #'+default/yank-pop))
 #+END_SRC
+
 ** Other fixup
 *** Counsel keybindings for left/right-arrow when navigating directories
 
@@ -591,7 +596,7 @@ This is some basics that are necessary
 ** TODO working tab line
 #+BEGIN_SRC emacs-lisp
 
-(global-tab-line-mode 1)
+;;(global-tab-line-mode 1)
 ;;(after! tab-line
 ;;  (custom-set-faces!
 ;;    '(tab-line-tab nil
@@ -605,3 +610,9 @@ This is some basics that are necessary
 ;;                            :background "#1d2021"
 ;;                            :foreground "red")))
 #+END_SRC
+
+** Debugging
+    #+BEGIN_SRC emacs-lisp
+(after! dap-mode
+     (setq dap-auto-configure-features '(sessions locals controls tooltip)))
+    #+END_SRC
